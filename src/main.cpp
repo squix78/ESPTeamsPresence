@@ -279,10 +279,10 @@ void setPresenceAnimation() {
 		setAnimation(0, FX_MODE_STATIC, ORANGE);
 	}
 	if (activity.equals("Busy")) {
-		setAnimation(0, FX_MODE_STATIC, PURPLE);
+		setAnimation(0, FX_MODE_STATIC, RED);
 	}
 	if (activity.equals("DoNotDisturb") || activity.equals("UrgentInterruptionsOnly")) {
-		setAnimation(0, FX_MODE_STATIC, PINK);
+		setAnimation(0, FX_MODE_STATIC, RED);
 	}
 	if (activity.equals("InACall")) {
 		setAnimation(0, FX_MODE_BREATH, RED);
@@ -294,13 +294,13 @@ void setPresenceAnimation() {
 		setAnimation(0, FX_MODE_BREATH, WHITE);
 	}
 	if (activity.equals("InAMeeting")) {
-		setAnimation(0, FX_MODE_SCAN, RED);
+		setAnimation(0, FX_MODE_STATIC, RED);
 	}	
 	if (activity.equals("Offline") || activity.equals("OffWork") || activity.equals("OutOfOffice") || activity.equals("PresenceUnknown")) {
 		setAnimation(0, FX_MODE_STATIC, BLACK);
 	}
 	if (activity.equals("Presenting")) {
-		setAnimation(0, FX_MODE_COLOR_WIPE, RED);
+		setAnimation(0, FX_MODE_BREATH, RED, 1000);
 	}
 }
 
@@ -535,17 +535,17 @@ void statemachine() {
  */
 void neopixelTask(void * parameter) {
 	for (;;) {
-		ws2812fx.service();
+		//ws2812fx.service();
 		vTaskDelay(10);
 	}
 }
 
 void customShow(void) {
-	uint8_t *pixels = ws2812fx.getPixels();
+	//uint8_t *pixels = ws2812fx.getPixels();
 	// numBytes is one more then the size of the ws2812fx's *pixels array.
 	// the extra byte is used by the driver to insert the LED reset pulse at the end.
-	uint16_t numBytes = ws2812fx.getNumBytes() + 1;
-	rmt_write_sample(RMT_CHANNEL_0, pixels, numBytes, false); // channel 0
+	//uint16_t numBytes = ws2812fx.getNumBytes() + 1;
+	//rmt_write_sample(RMT_CHANNEL_0, pixels, numBytes, false); // channel 0
 }
 
 
@@ -564,8 +564,14 @@ void setup()
 
 	// WS2812FX
 	ws2812fx.init();
-	rmt_tx_int(RMT_CHANNEL_0, ws2812fx.getPin());
+	ws2812fx.setBrightness(100);
+	ws2812fx.setSpeed(200);
+	ws2812fx.setMode(FX_MODE_BREATH);
+	rmt_tx_int(RMT_CHANNEL_0, 38);
 	ws2812fx.start();
+//ws2812fx.init();
+	//rmt_tx_int(RMT_CHANNEL_0, 38);
+	//ws2812fx.start();
 	setAnimation(0, FX_MODE_STATIC, WHITE);
 
 	// iotWebConf - Initializing the configuration.
@@ -593,8 +599,8 @@ void setup()
 		DBG_PRINTLN(F("Number of LEDs not given, using 16."));
 		numberLeds = NUMLEDS;
 	}
-	ws2812fx.setLength(numberLeds);
-	ws2812fx.setCustomShow(customShow);
+	//ws2812fx.setLength(numberLeds);
+	//ws2812fx.setCustomShow(customShow);
 
 	// HTTP server - Set up required URL handlers on the web server.
 	server.on("/", HTTP_GET, handleRoot);
@@ -642,6 +648,7 @@ void loop()
 {
 	// iotWebConf - doLoop should be called as frequently as possible.
 	iotWebConf.doLoop();
-
+ws2812fx.service();
 	statemachine();
+delay(10);
 }
